@@ -2,8 +2,7 @@
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 // @ifdef INCLUDE_DEFINITIONS
 /// <reference path="References/GameStartr-0.2.0.ts" />
@@ -76,17 +75,6 @@ var FullScreenMario;
             _super.prototype.resetAudioPlayer.call(this, FSM, settings);
             FSM.AudioPlayer.setGetVolumeLocal(FSM.getVolumeLocal.bind(FSM, FSM));
             FSM.AudioPlayer.setGetThemeDefault(FSM.getAudioThemeDefault.bind(FSM, FSM));
-        };
-        /**
-         * Sets this.ThingHitter.
-         *
-         * @param {FullScreenMario} FSM
-         * @param {Object} customs
-         */
-        FullScreenMario.prototype.resetThingHitter = function (FSM, settings) {
-            _super.prototype.resetThingHitter.call(this, FSM, settings);
-            FSM.ThingHitter.cacheHitCheckGroup("Solid");
-            FSM.ThingHitter.cacheHitCheckGroup("Character");
         };
         /**
          * Sets this.MapsHandler.
@@ -204,10 +192,7 @@ var FullScreenMario;
                 thing.height = thing.FSM.getAbsoluteHeight(thing.y) / thing.FSM.unitsize;
             }
             _super.prototype.thingProcess.call(this, thing, title, settings, defaults);
-            // ThingHittr becomes very non-performant if functions aren't generated
-            // for each Thing constructor (optimization does not respect prototypal 
-            // inheritance, sadly).
-            thing.FSM.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+            thing.FSM.ThingHitter.cacheChecksForType(thing.title, thing.groupType);
         };
         /**
          * Adds a Thing via addPreThing based on the specifications in a PreThing.
@@ -686,7 +671,7 @@ var FullScreenMario;
                 character.under = character.undermid = undefined;
                 FSM.updatePosition(character);
                 FSM.QuadsKeeper.determineThingQuadrants(character);
-                FSM.ThingHitter.checkHitsOf[character.title](character);
+                FSM.ThingHitter.checkHitsForThing(character);
                 // Overlaps
                 if (character.overlaps && character.overlaps.length) {
                     FSM.maintainOverlaps(character);
@@ -5817,7 +5802,10 @@ var FullScreenMario;
          */
         FullScreenMario.prototype.cutsceneBowserVictoryBowserFalls = function (FSM, settings) {
             FSM.AudioPlayer.play("Bowser Falls");
-            settings.bowser.nofall = true;
+            // Bowser won't exist if the player already killed him with a star or fireballs
+            if (settings.bowser) {
+                settings.bowser.nofall = true;
+            }
         };
         /**
          * Routine for displaying text above a castle NPC. Each "layer" of text
@@ -6163,7 +6151,8 @@ var FullScreenMario;
          * @return {Object}
          */
         FullScreenMario.prototype.macroWater = function (reference, prethings, area, map, scope) {
-            var x = reference.x || 0, y = (reference.y || 0) + 2, output = FullScreenMario.prototype.proliferate({
+            var x = reference.x || 0, y = (reference.y || 0) + 2, // water is 3.5 x 5.5
+            output = FullScreenMario.prototype.proliferate({
                 "thing": "Water",
                 "x": x,
                 "y": y,

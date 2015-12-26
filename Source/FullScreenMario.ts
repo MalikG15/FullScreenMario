@@ -189,19 +189,6 @@ module FullScreenMario {
         }
 
         /**
-         * Sets this.ThingHitter.
-         * 
-         * @param {FullScreenMario} FSM
-         * @param {Object} customs
-         */
-        resetThingHitter(FSM: FullScreenMario, settings: GameStartr.IGameStartrSettings): void {
-            super.resetThingHitter(FSM, settings);
-
-            FSM.ThingHitter.cacheHitCheckGroup("Solid");
-            FSM.ThingHitter.cacheHitCheckGroup("Character");
-        }
-
-        /**
          * Sets this.MapsHandler.
          * 
          * @param {FullScreenMario} FSM
@@ -351,10 +338,7 @@ module FullScreenMario {
 
             super.thingProcess(thing, title, settings, defaults);
 
-            // ThingHittr becomes very non-performant if functions aren't generated
-            // for each Thing constructor (optimization does not respect prototypal 
-            // inheritance, sadly).
-            thing.FSM.ThingHitter.cacheHitCheckType(thing.title, thing.groupType);
+            thing.FSM.ThingHitter.cacheChecksForType(thing.title, thing.groupType);
         }
 
         /**
@@ -944,7 +928,7 @@ module FullScreenMario {
                 character.under = character.undermid = undefined;
                 FSM.updatePosition(character);
                 FSM.QuadsKeeper.determineThingQuadrants(character);
-                FSM.ThingHitter.checkHitsOf[character.title](character);
+                FSM.ThingHitter.checkHitsForThing(character);
 
                 // Overlaps
                 if (character.overlaps && character.overlaps.length) {
@@ -7371,7 +7355,11 @@ module FullScreenMario {
          */
         cutsceneBowserVictoryBowserFalls(FSM: FullScreenMario, settings: any): void {
             FSM.AudioPlayer.play("Bowser Falls");
-            settings.bowser.nofall = true;
+
+            // Bowser won't exist if the player already killed him with a star or fireballs
+            if (settings.bowser) {
+                settings.bowser.nofall = true;
+            }
         }
 
         /**

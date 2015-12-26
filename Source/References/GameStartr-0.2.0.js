@@ -29,8 +29,7 @@
 var __extends = (this && this.__extends) || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
-    __.prototype = b.prototype;
-    d.prototype = new __();
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
 var GameStartr;
 (function (GameStartr_1) {
@@ -223,12 +222,12 @@ var GameStartr;
         GameStartr.prototype.resetGamesRunner = function (GameStarter, settings) {
             GameStarter.GamesRunner = new GamesRunnr.GamesRunnr(GameStarter.proliferate({
                 "adjustFramerate": true,
-                "interval": 1000 / 60,
                 "scope": GameStarter,
                 "onPlay": GameStarter.onGamePlay.bind(GameStarter, GameStarter),
                 "onPause": GameStarter.onGamePause.bind(GameStarter, GameStarter),
                 "FPSAnalyzer": new FPSAnalyzr.FPSAnalyzr()
             }, GameStarter.settings.runner));
+            GameStarter.FPSAnalyzer = GameStarter.GamesRunner.getFPSAnalyzer();
         };
         /**
          * Sets this.ItemsHolder.
