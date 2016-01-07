@@ -1,3 +1,4 @@
+/// <reference path="AreaSpawnr-0.2.0.ts" />
 /// <reference path="AudioPlayr-0.2.1.ts" />
 /// <reference path="ChangeLinr-0.2.0.ts" />
 /// <reference path="DeviceLayr-0.2.0.ts" />
@@ -10,7 +11,6 @@
 /// <reference path="LevelEditr-0.2.0.ts" />
 /// <reference path="MapsCreatr-0.2.1.ts" />
 /// <reference path="MapScreenr-0.2.1.ts" />
-/// <reference path="MapsHandlr-0.2.0.ts" />
 /// <reference path="MathDecidr-0.2.0.ts" />
 /// <reference path="ModAttachr-0.2.2.ts" />
 /// <reference path="NumberMakr-0.2.2.ts" />
@@ -23,6 +23,7 @@
 /// <reference path="ThingHittr-0.2.0.ts" />
 /// <reference path="TimeHandlr-0.2.0.ts" />
 /// <reference path="TouchPassr-0.2.0.ts" />
+/// <reference path="UsageHelpr-0.2.0.ts" />
 /// <reference path="UserWrappr-0.2.0.ts" />
 /// <reference path="WorldSeedr-0.2.0.ts" />
 /// <reference path="js_beautify.ts" />
@@ -55,6 +56,7 @@ var GameStartr;
              * Default list of reset Functions to call during this.reset or this.resetTimed, in order.
              */
             this.resets = [
+                "resetUsageHelper",
                 "resetObjectMaker",
                 "resetPixelRender",
                 "resetTimeHandler",
@@ -68,7 +70,7 @@ var GameStartr;
                 "resetPixelDrawer",
                 "resetNumberMaker",
                 "resetMapsCreator",
-                "resetMapsHandler",
+                "resetAreaSpawner",
                 "resetInputWriter",
                 "resetDeviceLayer",
                 "resetTouchPasser",
@@ -112,6 +114,15 @@ var GameStartr;
          */
         GameStartr.prototype.resetTimed = function (GameStarter, settings) {
             _super.prototype.resetTimed.call(this, GameStarter, GameStarter.resets, settings);
+        };
+        /**
+         * Sets this.UsageHelper.
+         *
+         * @param GameStarter
+         * @param customs   Any optional custom settings.
+         */
+        GameStartr.prototype.resetUsageHelper = function (GameStarter, settings) {
+            GameStarter.UsageHelper = new UsageHelpr.UsageHelpr(GameStarter.settings.help);
         };
         /**
          * Sets this.ObjectMaker.
@@ -307,14 +318,14 @@ var GameStartr;
             });
         };
         /**
-         * Sets this.MapsHandler.
+         * Sets this.AreaSpawner.
          *
          * @param GameStarter
          * @param customs   Any optional custom settings.
          * @remarks Requirement(s): maps.js (settings/maps.js)
          */
-        GameStartr.prototype.resetMapsHandler = function (GameStarter, settings) {
-            GameStarter.MapsHandler = new MapsHandlr.MapsHandlr({
+        GameStartr.prototype.resetAreaSpawner = function (GameStarter, settings) {
+            GameStarter.AreaSpawner = new AreaSpawnr.AreaSpawnr({
                 "MapsCreator": GameStarter.MapsCreator,
                 "MapScreener": GameStarter.MapScreener,
                 "screenAttributes": GameStarter.settings.maps.screenAttributes,
@@ -509,7 +520,7 @@ var GameStartr;
          * @remarks This is generally called by a QuadsKeepr during a screen update.
          */
         GameStartr.prototype.onAreaSpawn = function (GameStarter, direction, top, right, bottom, left) {
-            GameStarter.MapsHandler.spawnMap(direction, (top + GameStarter.MapScreener.top) / GameStarter.unitsize, (right + GameStarter.MapScreener.left) / GameStarter.unitsize, (bottom + GameStarter.MapScreener.top) / GameStarter.unitsize, (left + GameStarter.MapScreener.left) / GameStarter.unitsize);
+            GameStarter.AreaSpawner.spawnArea(direction, (top + GameStarter.MapScreener.top) / GameStarter.unitsize, (right + GameStarter.MapScreener.left) / GameStarter.unitsize, (bottom + GameStarter.MapScreener.top) / GameStarter.unitsize, (left + GameStarter.MapScreener.left) / GameStarter.unitsize);
         };
         /**
          * "Unspawns" all Things within a given area that should be gone by marking
@@ -524,7 +535,7 @@ var GameStartr;
          * @remarks This is generally called by a QuadsKeepr during a screen update.
          */
         GameStartr.prototype.onAreaUnspawn = function (GameStarter, direction, top, right, bottom, left) {
-            GameStarter.MapsHandler.unspawnMap(direction, (top + GameStarter.MapScreener.top) / GameStarter.unitsize, (right + GameStarter.MapScreener.left) / GameStarter.unitsize, (bottom + GameStarter.MapScreener.top) / GameStarter.unitsize, (left + GameStarter.MapScreener.left) / GameStarter.unitsize);
+            GameStarter.AreaSpawner.unspawnArea(direction, (top + GameStarter.MapScreener.top) / GameStarter.unitsize, (right + GameStarter.MapScreener.left) / GameStarter.unitsize, (bottom + GameStarter.MapScreener.top) / GameStarter.unitsize, (left + GameStarter.MapScreener.left) / GameStarter.unitsize);
         };
         /**
          * Adds a new Thing to the game at a given position, relative to the top
@@ -683,7 +694,7 @@ var GameStartr;
          * @param generatedCommands   Commands generated by WorldSeedr.generateFull.
          */
         GameStartr.prototype.mapPlaceRandomCommands = function (GameStarter, generatedCommands) {
-            var MapsCreator = GameStarter.MapsCreator, MapsHandler = GameStarter.MapsHandler, prethings = MapsHandler.getPreThings(), area = MapsHandler.getArea(), map = MapsHandler.getMap(), command, output, i;
+            var MapsCreator = GameStarter.MapsCreator, AreaSpawner = GameStarter.AreaSpawner, prethings = AreaSpawner.getPreThings(), area = AreaSpawner.getArea(), map = AreaSpawner.getMap(), command, output, i;
             for (i = 0; i < generatedCommands.length; i += 1) {
                 command = generatedCommands[i];
                 output = {
@@ -1104,7 +1115,7 @@ var GameStartr;
          * @returns A key that to identify the Thing's sprite.
          */
         GameStartr.prototype.generateObjectKey = function (thing) {
-            return thing.GameStarter.MapsHandler.getArea().setting
+            return thing.GameStarter.AreaSpawner.getArea().setting
                 + " " + thing.groupType + " "
                 + thing.title + " " + thing.className;
         };
