@@ -118,6 +118,11 @@ declare module FullScreenMario {
         background: string;
 
         /**
+         * A description of the environment, such as "Overworld".
+         */
+        setting: string;
+
+        /**
          * A callback to initialize the Area background as a function of its setting.
          * 
          * @param area   The Area having its background set.
@@ -2233,6 +2238,16 @@ declare module FullScreenMario {
          * @remarks This is generally called as the onMake call in an ObjectMakr.
          */
         thingProcess(thing: IThing, title: string, settings: any, defaults: any): void;
+
+        /**
+         * Generates a key for a Thing based off the current area and the Thing's
+         * basic attributes. This should be used for PixelRender.get calls, to
+         * cache the Thing's sprite.
+         * 
+         * @param thing
+         * @returns A key that to identify the Thing's sprite.
+         */
+        generateThingKey(thing: IThing): string;
 
         /**
          * Adds a Thing via addPreThing based on the specifications in a PreThing.
